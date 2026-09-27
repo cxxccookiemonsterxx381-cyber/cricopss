@@ -1,1 +1,17 @@
-
+name: Build CritOpsCheat.dylib
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile dylib
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          clang++ -arch arm64 -isysroot "$SDK" -miphoneos-version-min=14.0 -std=c++17 -ObjC++ -O2 -fvisibility=hidden -fno-objc-arc -dynamiclib -install_name "@executable_path/Frameworks/CritOpsCheat.dylib" -framework UIKit -framework Foundation -framework CoreGraphics -lc++ -lobjc -o CritOpsCheat.dylib CritOpsCheat.mm
+          strip -x CritOpsCheat.dylib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CritOpsCheat-dylib
+          path: CritOpsCheat.dylib
